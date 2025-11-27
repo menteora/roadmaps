@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/roadmaps/assets/favicon-DHRRMjnc.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Roadmap Timeline</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" crossorigin="anonymous">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            },
+            colors: {
+              background: "var(--background)",
+              foreground: "var(--foreground)",
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      :root {
+        --background: #ffffff;
+        --foreground: #0f172a;
+      }
+      .dark {
+        --background: #09090b;
+        --foreground: #f8fafc;
+      }
+      body {
+        background-color: var(--background);
+        color: var(--foreground);
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background: #334155;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+    </style>
+
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "uuid": "https://aistudiocdn.com/uuid@^13.0.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "clsx": "https://aistudiocdn.com/clsx@^2.1.1",
+    "tailwind-merge": "https://aistudiocdn.com/tailwind-merge@^3.4.0",
+    "html-to-image": "https://aistudiocdn.com/html-to-image@^1.11.11"
+  }
+}
+</script>
+  <script type="module" crossorigin src="/roadmaps/assets/index-CHOps3YS.js"></script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
