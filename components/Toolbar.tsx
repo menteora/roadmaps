@@ -1,9 +1,11 @@
+
 import React, { useRef, useState } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
 import { useTheme } from '../context/ThemeContext';
 import { Button } from './ui/Button';
 import { Modal } from './ui/Modal';
-import { Download, Upload, Trash2, Sun, Moon, Map, Rows, Columns, Calendar, Plus, X, AlertTriangle } from 'lucide-react';
+import { Download, Upload, Trash2, Sun, Moon, Map, Rows, Columns, Calendar, Plus, X, AlertTriangle, Image as ImageIcon } from 'lucide-react';
+import * as htmlToImage from 'html-to-image';
 
 interface ConfirmationState {
   type: 'delete_sheet' | 'reset_sheet';
@@ -22,8 +24,20 @@ export const Toolbar: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [confirmation, setConfirmation] = useState<ConfirmationState | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const activeSheet = sheets.find(s => s.id === activeSheetId);
+
+  const getSafeName = () => {
+    const rawName = activeSheet?.name || 'roadmap';
+    const safeName = rawName.replace(/[^a-z0-9]/gi, '-').toLowerCase().replace(/-+/g, '-').replace(/^-|-$/g, '');
+    
+    const now = new Date();
+    const p = (n: number) => n.toString().padStart(2, '0');
+    const timestamp = `${now.getFullYear()}${p(now.getMonth() + 1)}${p(now.getDate())}-${p(now.getHours())}${p(now.getMinutes())}${p(now.getSeconds())}`;
+    
+    return `${safeName}-${timestamp}`;
+  };
 
   const handleExport = () => {
     const data = exportWorkflow();
@@ -31,9 +45,41 @@ export const Toolbar: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `roadmap-export-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `${getSafeName()}.json`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleExportImage = async () => {
+    const elementId = orientation === 'timeline' ? 'timeline-content' : 'graph-content';
+    const node = document.getElementById(elementId);
+    
+    if (!node) return;
+
+    setIsExporting(true);
+    try {
+        // Set background color explicitly to avoid transparency issues or theme mismatch
+        const bgColor = theme === 'dark' ? '#09090b' : '#f8fafc';
+        
+        const dataUrl = await htmlToImage.toPng(node, { 
+            backgroundColor: bgColor,
+            cacheBust: true, // Prevents CORS issues with cached external images
+            skipAutoScale: true, // Prevents layout shifts during capture
+            style: {
+                transform: 'scale(1)', // Ensure no weird scaling transforms are captured
+            }
+        });
+        
+        const link = document.createElement('a');
+        link.download = `${getSafeName()}.png`;
+        link.href = dataUrl;
+        link.click();
+    } catch (error) {
+        console.error('Failed to export image', error);
+        alert('Failed to generate image. Please try again.');
+    } finally {
+        setIsExporting(false);
+    }
   };
 
   const handleImportClick = () => {
@@ -82,7 +128,7 @@ export const Toolbar: React.FC = () => {
 
   return (
     <>
-        <div className="fixed top-0 left-0 right-0 h-16 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 z-40 flex items-center justify-between px-4 sm:px-6">
+        <div className={`fixed top-0 left-0 right-0 h-16 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 z-40 flex items-center justify-between px-4 sm:px-6 ${isExporting ? 'cursor-wait' : ''}`}>
         
         {/* Left: App Title & Sheet Manager */}
         <div className="flex items-center gap-3 flex-1 overflow-hidden mr-4">
@@ -163,11 +209,16 @@ export const Toolbar: React.FC = () => {
 
             <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block" />
 
-            <Button variant="ghost" size="icon" onClick={handleExport} title="Export Roadmap (All Sheets)">
-            <Download size={18} />
+            <Button variant="ghost" size="icon" onClick={handleExportImage} disabled={isExporting} title="Export as Image (PNG)">
+                <ImageIcon size={18} className={isExporting ? 'animate-pulse text-blue-500' : ''} />
             </Button>
+
+            <Button variant="ghost" size="icon" onClick={handleExport} title="Export Roadmap (JSON)">
+                <Download size={18} />
+            </Button>
+            
             <Button variant="ghost" size="icon" onClick={handleImportClick} title="Import Roadmap">
-            <Upload size={18} />
+                <Upload size={18} />
             </Button>
             <input 
                 type="file" 

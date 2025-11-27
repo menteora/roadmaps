@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { WorkflowContextType, WorkflowNode, LayoutOrientation, Sheet } from '../types';
 import { INITIAL_NODES } from '../constants';
@@ -176,31 +177,47 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             return;
         }
 
-        // Merge Logic: Update existing by name, add new if not found
-        setSheets(prev => {
-            const newSheets = [...prev];
-            
-            importedSheets.forEach(imported => {
-                const existingIndex = newSheets.findIndex(s => s.name === imported.name);
-                
-                if (existingIndex !== -1) {
-                    // Update existing sheet
-                    newSheets[existingIndex] = {
-                        ...newSheets[existingIndex],
-                        nodes: imported.nodes
-                    };
-                } else {
-                    // Add new sheet, ensure unique ID
-                    newSheets.push({
-                        ...imported,
-                        id: imported.id || uuidv4() // Ensure ID
-                    });
-                }
-            });
-            return newSheets;
-        });
+        // Check if the current environment is in its initial "Pristine" state.
+        // Logic: Only 1 sheet exists, it has the default ID, and the nodes match INITIAL_NODES exactly.
+        const isDefaultSheetUnmodified = 
+            sheets.length === 1 && 
+            sheets[0].id === DEFAULT_SHEET_ID &&
+            JSON.stringify(sheets[0].nodes) === JSON.stringify(INITIAL_NODES);
 
-        console.log(`Import successful. Processed ${importedSheets.length} sheet(s).`);
+        if (isDefaultSheetUnmodified) {
+            // REPLACE STRATEGY: Overwrite completely
+            // Ensure IDs are unique just in case, though usually unnecessary for full replace
+            const preparedSheets = importedSheets.map(s => ({...s, id: s.id || uuidv4()}));
+            setSheets(preparedSheets);
+            setActiveSheetId(preparedSheets[0].id);
+            setCollapsedNodeIds([]);
+            console.log(`Import successful. Replaced default sheet with ${preparedSheets.length} sheet(s).`);
+        } else {
+            // MERGE STRATEGY: Update existing by name, add new if not found
+            setSheets(prev => {
+                const newSheets = [...prev];
+                
+                importedSheets.forEach(imported => {
+                    const existingIndex = newSheets.findIndex(s => s.name === imported.name);
+                    
+                    if (existingIndex !== -1) {
+                        // Update existing sheet
+                        newSheets[existingIndex] = {
+                            ...newSheets[existingIndex],
+                            nodes: imported.nodes
+                        };
+                    } else {
+                        // Add new sheet, ensure unique ID
+                        newSheets.push({
+                            ...imported,
+                            id: imported.id || uuidv4() // Ensure ID
+                        });
+                    }
+                });
+                return newSheets;
+            });
+            console.log(`Import successful. Merged ${importedSheets.length} sheet(s).`);
+        }
 
     } catch (e) {
         console.error('Failed to parse JSON', e);

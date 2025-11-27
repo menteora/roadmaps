@@ -1,4 +1,5 @@
-export type NodeStatus = 'active' | 'completed' | 'abandoned';
+
+export type NodeStatus = 'active' | 'completed' | 'abandoned' | 'standby';
 
 export interface WorkflowNode {
   id: string;

@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
 import { WorkflowNode } from '../types';
@@ -65,13 +66,17 @@ export const TimelineView: React.FC = () => {
   return (
     <>
       <div className="w-full h-full overflow-auto bg-slate-50 dark:bg-slate-950 p-6 md:p-12">
-        <div className="max-w-3xl mx-auto">
+        <div id="timeline-content" className="max-w-3xl mx-auto bg-slate-50 dark:bg-slate-950 p-4">
             
             <div className="flex justify-between items-center mb-8">
                 <h2 className="text-2xl font-bold flex items-center gap-2">
                     <Calendar className="text-blue-600" />
                     Chronological Timeline
                 </h2>
+                {/* Hidden in export to keep it clean, handled by CSS or logic if strictly needed, but button remains visible in UI */}
+            </div>
+
+            <div className="flex justify-end mb-4">
                 <Button onClick={handleAddRoot} size="sm">
                     <Plus size={16} className="mr-1" />
                     New Event
@@ -85,7 +90,10 @@ export const TimelineView: React.FC = () => {
                         <div 
                             className={`
                                 absolute -left-[9px] top-1 w-5 h-5 rounded-full border-4 border-slate-50 dark:border-slate-950
-                                ${node.status === 'completed' ? 'bg-green-500' : node.status === 'abandoned' ? 'bg-slate-400' : 'bg-blue-500'}
+                                ${node.status === 'completed' ? 'bg-green-500' : 
+                                  node.status === 'abandoned' ? 'bg-slate-400' : 
+                                  node.status === 'standby' ? 'bg-amber-500' : 
+                                  'bg-blue-500'}
                             `}
                         />
                         
@@ -96,6 +104,8 @@ export const TimelineView: React.FC = () => {
                                 group relative p-4 rounded-xl border transition-all cursor-pointer hover:shadow-md
                                 ${node.status === 'abandoned' 
                                     ? 'bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 opacity-75 grayscale' 
+                                    : node.status === 'standby'
+                                    ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800/30'
                                     : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'
                                 }
                             `}
@@ -110,6 +120,7 @@ export const TimelineView: React.FC = () => {
                                         text-[10px] uppercase font-bold px-2 py-0.5 rounded-full
                                         ${node.status === 'completed' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 
                                           node.status === 'abandoned' ? 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400' : 
+                                          node.status === 'standby' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
                                           'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'}
                                     `}>
                                         {node.status}

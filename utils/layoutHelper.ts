@@ -1,3 +1,4 @@
+
 import { WorkflowNode, RenderedNode, RenderedEdge, LayoutOrientation } from '../types';
 import { COLORS, GAP_X, GAP_Y, NODE_WIDTH, NODE_HEIGHT, H_GAP_X, H_GAP_Y, H_NODE_WIDTH, H_NODE_HEIGHT } from '../constants';
 
@@ -113,9 +114,13 @@ export const calculateLayout = (
     laneAllocation[assignedLane] = node.id;
     
     // Assign Color based on Lane
-    const color = node.status === 'abandoned' 
-        ? '#64748b' 
-        : COLORS[assignedLane % COLORS.length];
+    let color = COLORS[assignedLane % COLORS.length];
+    
+    if (node.status === 'abandoned') {
+        color = '#64748b'; // Slate 500
+    } else if (node.status === 'standby') {
+        color = '#f59e0b'; // Amber 500
+    }
 
     // Calculate X, Y
     let x = 0;
@@ -147,13 +152,17 @@ export const calculateLayout = (
       node.parentIds.forEach(parentId => {
           const parent = nodeMap.get(parentId);
           if (parent) {
+              let edgeColor = parent.color;
+              if (node.status === 'abandoned') edgeColor = '#94a3b8';
+              else if (node.status === 'standby') edgeColor = '#fbbf24'; // Amber 400
+
               renderedEdges.push({
                   id: `${parent.id}-${node.id}`,
                   sourceX: parent.x,
                   sourceY: parent.y,
                   targetX: node.x,
                   targetY: node.y,
-                  color: node.status === 'abandoned' ? '#94a3b8' : parent.color,
+                  color: edgeColor,
                   status: node.status
               });
           }

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { WorkflowNode, NodeStatus } from '../types';
 import { Button } from './ui/Button';
@@ -121,6 +122,7 @@ export const NodeEditor: React.FC<NodeEditorProps> = ({ node, parentId, onClose 
             >
                 <option value="active" className="text-black">Active</option>
                 <option value="completed" className="text-black">Completed</option>
+                <option value="standby" className="text-black">Standby</option>
                 <option value="abandoned" className="text-black">Abandoned</option>
             </select>
         </div>

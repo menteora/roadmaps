@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
 import { calculateLayout, getPath } from '../utils/layoutHelper';
@@ -6,6 +7,9 @@ import { Plus, Edit2, GitCommit, Calendar, ChevronDown, ChevronRight, ChevronsDo
 import { Modal } from './ui/Modal';
 import { NodeEditor } from './NodeEditor';
 import { WorkflowNode } from '../types';
+
+// Inline base64 noise SVG to prevent CORS issues during export
+const NOISE_BG = "data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E";
 
 export const GraphCanvas: React.FC = () => {
   const { nodes, orientation, collapsedNodeIds, toggleNodeCollapse } = useWorkflow();
@@ -84,8 +88,19 @@ export const GraphCanvas: React.FC = () => {
 
   return (
     <>
-      <div className="w-full h-full overflow-auto bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-slate-50 dark:bg-black/95 transition-colors">
-        <div className="relative" style={{ width: width, height: height, minWidth: '100%', minHeight: '100%' }}>
+      <div className="w-full h-full overflow-auto bg-slate-50 dark:bg-black/95 transition-colors"
+           style={{ backgroundImage: `url("${NOISE_BG}")` }}>
+        <div 
+          id="graph-content"
+          className="relative bg-slate-50 dark:bg-black/95"
+          style={{ 
+              width: width, 
+              height: height, 
+              minWidth: '100%', 
+              minHeight: '100%',
+              backgroundImage: `url("${NOISE_BG}")`
+          }}
+        >
           <svg className="absolute inset-0 pointer-events-none" width={width} height={height}>
             <defs>
                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -99,7 +114,7 @@ export const GraphCanvas: React.FC = () => {
                 stroke={edge.color}
                 strokeWidth="2"
                 fill="none"
-                strokeDasharray={edge.status === 'abandoned' ? "5,5" : "none"}
+                strokeDasharray={(edge.status === 'abandoned' || edge.status === 'standby') ? "5,5" : "none"}
                 className="transition-all duration-500"
               />
             ))}
@@ -125,6 +140,8 @@ export const GraphCanvas: React.FC = () => {
                       ? 'border-slate-300 bg-slate-100/50 dark:border-slate-700 dark:bg-slate-800/50 grayscale opacity-80' 
                       : node.status === 'completed'
                       ? 'border-green-500/50 bg-green-50/80 dark:bg-green-900/10'
+                      : node.status === 'standby'
+                      ? 'border-amber-400 border-dashed bg-amber-50 dark:bg-amber-900/10 dark:border-amber-600'
                       : 'bg-white/90 dark:bg-slate-900/90'
                   }
                   ${isCollapsed ? 'border-dashed opacity-90' : ''}
@@ -155,6 +172,7 @@ export const GraphCanvas: React.FC = () => {
                       {new Date(node.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                   </span>
                   {node.status === 'abandoned' && <span className="text-[10px] uppercase font-bold text-slate-500">Dead End</span>}
+                  {node.status === 'standby' && <span className="text-[10px] uppercase font-bold text-amber-500">Standby</span>}
                 </div>
 
                 <h3 className="font-bold text-sm leading-tight mb-1 line-clamp-2">{node.title}</h3>
