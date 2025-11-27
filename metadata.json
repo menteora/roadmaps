@@ -1,0 +1,5 @@
+{
+  "name": "Roadmap Timeline",
+  "description": "A visual roadmap tool. Map goals, daily tasks, and decision trees with branching, merging, and dead ends. Supports vertical/horizontal layouts, multi-sheet management, and JSON import/export.",
+  "requestFramePermissions": []
+}
